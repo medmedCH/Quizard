@@ -243,6 +243,8 @@ router.route('/login').post([
             const token = JWT.sign(payload, config.get('jwtSecret'), {
                 expiresIn: 3600
             });
+            user.lastLogin = new Date();
+            user.save();
             // res.cookie('access_token', token, { expires: new Date(Date.now() + 900000), httpOnly: true });
             return res.json({ user, token });
         }
@@ -411,4 +413,112 @@ router.get('/userid/:id', (req, res) => {
         .then(user => res.json(user))
         .catch(err => res.status(400).json('Error: ' + err));
 })
+
+router.get('/stats' , (req,res)=>{
+    User.find().exec((err,data)=>{
+        const result = {
+            total:0,
+            teachers :0,
+            students:0,
+            admins:0
+        }
+
+        switch(req.query.filter){
+            case 'today':
+                const today = (new Date()).getFullYear()+"-"+((new Date()).getMonth()+1)+"-"+(new Date()).getDate();
+                data.forEach(user=>{
+                    const userDate = user.registrationDate.getFullYear()+"-"+((user.registrationDate).getMonth()+1)+"-"+(user.registrationDate).getDate();
+                    if(today===userDate){
+                        result.total+=1;
+                        if(user.role==="Student") result.students+=1;
+                        else if(user.role==="Teacher") result.teachers+=1;
+                        else if(user.role==="Admin") result.admins+=1;
+                    }
+                });
+                break;
+            case 'yesterday':
+                const yesterday = (new Date()).getFullYear()+"-"+((new Date()).getMonth()+1)+"-"+((new Date()).getDate()-1);
+                data.forEach(user=>{
+                    const userDate = user.registrationDate.getFullYear()+"-"+((user.registrationDate).getMonth()+1)+"-"+(user.registrationDate).getDate();
+                    if(yesterday===userDate){
+                        result.total+=1;
+                        if(user.role==="Student") result.students+=1;
+                        else if(user.role==="Teacher") result.teachers+=1;
+                        else if(user.role==="Admin") result.admins+=1;
+                    }
+                });
+                break;
+            case 'lastWeek':
+                let lastWeek = new Date();
+                lastWeek.setDate(lastWeek.getDate()-7);
+                data.forEach(user=>{
+                    if(user.registrationDate>=lastWeek){
+                        result.total+=1;
+                        if(user.role==="Student") result.students+=1;
+                        else if(user.role==="Teacher") result.teachers+=1;
+                        else if(user.role==="Admin") result.admins+=1;
+                    }
+                });
+                break;
+            case 'lastMonth':
+                let lastMonth = new Date();
+                lastMonth.setDate(lastMonth.getDate()-30);
+                data.forEach(user=>{
+                    if(user.registrationDate>=lastMonth){
+                        result.total+=1;
+                        if(user.role==="Student") result.students+=1;
+                        else if(user.role==="Teacher") result.teachers+=1;
+                        else if(user.role==="Admin") result.admins+=1;
+                    }
+                });
+                break;
+            default:
+                return res.status(404).send('invalid filter');
+        }
+
+        res.json(result);
+    });
+});
+
+router.get('/statLastLogin',(req,res)=>{
+    User.find().exec((err,data)=>{
+        const result ={
+            users:[]
+        }
+        data.forEach(user=>{
+                const userr = {
+                    _id:user._id,
+                    fullName:user.Firstname+" "+user.Lastname,
+                    email : user.email,
+                    register: user.registrationDate,
+                    role:user.role,
+                    lastLogin:user.lastLogin,
+                    avatar : user.avatar
+                }
+                const last= (new Date())-user.lastLogin;
+                if(last<60000) userr.lastLoginDuration =parseInt(last/1000)+" sec ago";
+                else if(last<(60000*60)) userr.lastLoginDuration =parseInt(last/1000/60)+" min ago";
+                else if(last<(60000*60*24)){
+                 if(parseInt(last/1000/60/60)===1) userr.lastLoginDuration ="1 hour ago";
+                 else userr.lastLoginDuration =parseInt(last/1000/60/60)+" hours ago";
+                }
+                else if(last<(60000*60*24*30)){
+                    if(parseInt(last/1000/60/60/24)===1) userr.lastLoginDuration ="1 day ago";
+                    else userr.lastLoginDuration =parseInt(last/1000/60/60/24)+" days ago";
+                   }
+                else if(last>(60000*60*24*30)) userr.lastLoginDuration ="more than 30 days ago";
+                result.users.push(userr);
+        });
+        result.number=result.users.length;
+        res.json(result);
+    });
+});
+
+router.get('/lastLoginStatInit' , (req,res)=>{
+    User.updateMany({}, { $set: { lastLogin: new Date('1995-12-17T03:24:00') } }).then(()=>res.send('ok'));
+});
+
+router.get('/registerStatInit' , (req,res)=>{
+    User.updateMany({}, { $set: { registrationDate: new Date('2020-05-17T03:24:00') } }).then(()=>res.send('ok'));
+});
 module.exports = router;

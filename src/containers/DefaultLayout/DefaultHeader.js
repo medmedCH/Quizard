@@ -77,18 +77,18 @@ const DefaultHeader = ({ auth: { isAuthenticated, loading, user }, logout }) => 
         </Nav>
 
         <Nav className="ml-auto" navbar>
-
+        {!loading && (<Fragment>{isAuthenticated ? authLinks : GuestLinks}</Fragment>)}
           <NavItem className="d-md-down-none">
 
-            <NavLink to="#" className="nav-link"><h3><strong>Welcome <i>{user.username} </i></strong></h3></NavLink>
+            <NavLink to="#" className="nav-link"><h4><strong><i>{user.username} &nbsp; </i></strong></h4></NavLink>
           </NavItem>
-          {!loading && (<Fragment>{isAuthenticated ? authLinks : GuestLinks}</Fragment>)}
+      
 
 
 
         </Nav>
 
-        <AppAsideToggler className="d-md-down-none" />
+        {/*<AppAsideToggler className="d-md-down-none" />*/}
         {/*<AppAsideToggler className="d-lg-none" mobile />*/}
       </React.Fragment>
     </Fragment>

@@ -44,6 +44,14 @@ const userSchema = new Schema({
         type: Date,
         default: null
     },
+    registrationDate: {
+        type: Date,
+        default: new Date()
+    },
+    lastLogin: {
+        type: Date,
+        default: new Date()
+    },
 
 
 
