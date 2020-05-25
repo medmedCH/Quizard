@@ -5,7 +5,7 @@ const router = express.Router();
 const socketio = require('socket.io');
 const cors = require('cors');
 
-const io = socketio(process.env.port || 5001);
+const io = socketio(process.env.PORT || 5001);
 
 const { addUser, removeUser, getUser, getUsersInRoom } = require('./user');
 
