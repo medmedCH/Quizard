@@ -3,6 +3,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import AdminDashboard from './Admin';
 import TeacherDashboard from '../Classes/Teacherclasses';
+import StudentDashboard from './Student';
 
 class Dashboard extends Component {
   constructor(props) {
@@ -33,7 +34,7 @@ class Dashboard extends Component {
           <h1>{welcoming()} {user.Firstname} {user.Lastname}</h1>
         </div>
         <br/>
-        {user.role === "Admin"? <AdminDashboard moi={this.props.user} /> : user.role==="Teacher" ? <TeacherDashboard/> : null}
+        {user.role === "Admin"? <AdminDashboard moi={this.props.user} /> : user.role==="Teacher" ? <TeacherDashboard/> : user.role==="Student"? <StudentDashboard moi={user}/> : null}
       </Fragment>
     else return null;
   }

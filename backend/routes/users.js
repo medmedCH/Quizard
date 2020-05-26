@@ -521,4 +521,13 @@ router.get('/lastLoginStatInit' , (req,res)=>{
 router.get('/registerStatInit' , (req,res)=>{
     User.updateMany({}, { $set: { registrationDate: new Date('2020-05-17T03:24:00') } }).then(()=>res.send('ok'));
 });
+
+router.get('/quizData/:id' , (req,res)=>{
+    User.findById(req.params.id).then(user=> {
+        res.json({
+        quizez : user.Quizzs,
+        score : user.note
+    });
+});
+});
 module.exports = router;
